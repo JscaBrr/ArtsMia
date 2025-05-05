@@ -46,11 +46,25 @@ class View(ft.UserControl):
     @property
     def controller(self):
         return self._controller
+
     @controller.setter
     def controller(self, controller):
         self._controller = controller
 
     def set_controller(self, controller):
         self._controller = controller
+
     def update_page(self):
+        self._page.update()
+
+    def alert(self, messaggio):
+        dlg = ft.AlertDialog(title=ft.Row([ft.Icon(ft.icons.ERROR, color="red"), ft.Text("Errore:")]),
+                            content=ft.Text(messaggio, color="red"),
+                             actions=[ft.TextButton("OK", on_click=lambda e: self.closeAlert(dlg))])
+        self._page.dialog = dlg
+        dlg.open = True
+        self._page.update()
+
+    def closeAlert(self, dlg):
+        dlg.open = False
         self._page.update()
