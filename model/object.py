@@ -1,6 +1,5 @@
 from dataclasses import dataclass
 
-
 @dataclass
 class Object:
     object_id: int
@@ -21,12 +20,10 @@ class Object:
     title: str
 
     def __str__(self):
-        return f'{self.object_id}'
+        return self.object_name
 
     def __eq__(self, other):
-        if isinstance(other, Object):
-            return self.object_id == other.object_id
-        return False
+        return self.object_id == other.object_id
 
     def __hash__(self):
         return hash(self.object_id)

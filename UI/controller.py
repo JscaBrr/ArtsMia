@@ -2,37 +2,46 @@ import flet as ft
 from UI.view import View
 from model.model import Model
 
-
 class Controller:
     def __init__(self, view: View, model: Model):
-        # the view, with the graphical elements of the UI
         self._view = view
-        # the model, which implements the logic of the program and holds the data
         self._model = model
 
     def handleAnalizzaOggetti(self, e):
-        self._model.creaGrafo()
+        bool, Nnodes, Nedges = self._model.analizzaOggetti()
         self._view.txt_result.controls.clear()
-        print( f"Creazione Grafo andata a buon fine:\nnumero nodi: {self._model.getNumNodi()} \nnumero archi: {self._model.getNumArchi()}")
-        self._view.txt_result.controls.append(ft.Text(
-            f"Creazione Grafo andata a buon fine:\nnumero nodi: {self._model.getNumNodi()} \nnumero archi: {self._model.getNumArchi()}"))
+        if bool is True:
+            self._view.txt_result.controls.append(ft.Text(f"Creazione grafo eseguita con successo\nNumero nodi: {Nnodes}\nNumero archi: {Nedges}"))
+            self._view._btnCompConnessa.disabled = False
         self._view.update_page()
 
-    def handleCompConnessa(self,e):
+    def handleComponenteConnessa(self, e):
+        self._insertedID = self._view._txtIdOggetto.value
         self._view.txt_result.controls.clear()
-        try:
-            id = int(self._view._txtIdOggetto.value)
-        except ValueError:
-            self._view.txt_result.controls.clear()
-            self._view.alert("id inserito non valido")
-            self._view.update_page()
-            return
-        if not self._model.checkExistece(id):
-            self._view.txt_result.controls.clear()
-            self._view.alert("id inserito non esistente")
-            self._view.update_page()
-            return
-        sizeConnessa = self._model.getCompConnessa(id)
-        self._view.txt_result.controls.append(ft.Text(f"dimensione della componente connessa per l'id inserito {id}: {sizeConnessa}"))
+        if self._insertedID:
+            value = self._model.computeComponenteConnessa(self._insertedID)
+            if value is False:
+                self._view.alert("Si è verificato un errore. Riprova")
+            else:
+                self._view.txt_result.controls.append(ft.Text(f"Eseguito con successo il calcolo della componente connessa\nNumero nodi: {value}"))
+                self._view._btnCercaOggetti.disabled = False
+        else:
+            self._view.alert("Inserire un ID prima di procedere")
         self._view.update_page()
+
+    def handleCercaOggetti(self, e):
+        self._insertedLUN = self._view._txtLUN.value
+        result = self._model.calcolaPercorso(self._insertedLUN)
+        self._view.txt_result.controls.clear()
+        if result is False:
+            self._view.alert("Errore. Riprova")
+        else:
+            percorso, costo = result
+            self._view.txt_result.controls.append(ft.Text(f"Calcolo della ricorsione con percorso di dimensione compresa tra 2 e {self._insertedLUN} eseguito\ncosto: {costo}"))
+            for i, item in enumerate(percorso, start=1):
+                self._view.txt_result.controls.append(ft.Text(f"{i}. {item}"))
+        self._view.update_page()
+
+
+
 

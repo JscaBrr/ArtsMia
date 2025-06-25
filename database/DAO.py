@@ -1,19 +1,17 @@
 from database.DB_connect import DBConnect
-from model.edge import Edge
 from model.object import Object
 
-
-class DAO():
+class DAO:
 
     @staticmethod
     def getAllNodes():
         conn = DBConnect.get_connection()
         cursor = conn.cursor(dictionary=True)
-        query = "SELECT * from objects"
-        cursor.execute(query, ())
+        query = "SELECT DISTINCT * FROM objects"
+        cursor.execute(query)
         listobj = []
-        for dict in cursor:
-            listobj.append(Object(**dict))
+        for dct in cursor:
+            listobj.append(Object(**dct))
         cursor.close()
         conn.close()
         return listobj
@@ -22,18 +20,17 @@ class DAO():
     def getAllEdges():
         conn = DBConnect.get_connection()
         cursor = conn.cursor(dictionary=True)
-        query = """SELECT eo1.object_id as o1, eo2.object_id as o2, COUNT(*) as peso
-        FROM exhibition_objects  eo1
-        INNER JOIN exhibition_objects  eo2
-        ON eo1.exhibition_id = eo2.exhibition_id
-        AND eo2.object_id < eo1.object_id
-        GROUP BY eo1.object_id, eo2.object_id
-        ORDER BY peso DESC
-        """
-        cursor.execute(query, ())
+        query = """SELECT e1.object_id as o1, e2.object_id as o2, COUNT(*) as count
+        FROM exhibition_objects e1, exhibition_objects e2
+        WHERE e1.exhibition_id = e2.exhibition_id AND e1.object_id < e2.object_id
+        GROUP BY e1.object_id, e2.object_id
+        ORDER BY count ASC"""
+        cursor.execute(query)
         listobj = []
-        for dict in cursor:
-            listobj.append(Edge(**dict))
+        for dct in cursor:
+            listobj.append((dct['o1'], dct['o2'], dct['count']))
         cursor.close()
         conn.close()
         return listobj
+
+
